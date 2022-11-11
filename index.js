@@ -3,37 +3,29 @@ const variablesString = (length) => {
   return characters.slice(0, length);
 };
 
+// object equality function
+const isEqual = (a, b) => {
+  return JSON.stringify(a) === JSON.stringify(b);
+};
+
 const stringifyBoolean = (bool) => {
   return bool ? "T" : "F";
 };
 
+// P <-> Q
+const bicondition = (a, b) => a === b;
+
 // P → R
-const implication = (...args) => {
-  let result = true;
-  for (let i = 0; i < args.length; i++) {
-    if (i === 0) {
-      result = args[i];
-    } else {
-      result = result ? args[i] : true;
-    }
-  }
-  return result;
-};
+const implication = (a, b) => (a ? b : true);
 
 // P ∧ R
-const conjuction = (...args) => {
-  return [...args].every((arg) => arg);
-};
+const conjuction = (a, b) => a && b;
 
 // P V R
-const disjunction = (...args) => {
-  return [...args].some((arg) => arg);
-};
+const disjunction = (a, b) => a || b;
 
 // !P
-const negation = (...args) => {
-  return [...args].every((arg) => !arg);
-};
+const negation = (a) => !a;
 
 const findLogic = (fn, numberOfArguments) => {
   const name = variablesString(numberOfArguments);
@@ -58,24 +50,32 @@ const findLogic = (fn, numberOfArguments) => {
   return combimation;
 };
 
-let P;
-let Q;
-let R;
-let S;
-
-// example (P∨Q) → R
-const exec1 = (P, Q, R) => {
+// (P∨Q) → R
+const e1 = (P, Q, R) => {
   return implication(disjunction(P, Q), R);
 };
 
-console.log(findLogic(exec1, 3));
-//[
-//  { HCZ: [ 'F', 'F', 'F' ], result: 'T' },
-//  { HCZ: [ 'F', 'F', 'T' ], result: 'T' },
-//  { HCZ: [ 'F', 'T', 'F' ], result: 'F' },
-//  { HCZ: [ 'F', 'T', 'T' ], result: 'T' },
-//  { HCZ: [ 'T', 'F', 'F' ], result: 'F' },
-//  { HCZ: [ 'T', 'F', 'T' ], result: 'T' },
-//  { HCZ: [ 'T', 'T', 'F' ], result: 'F' },
-//  { HCZ: [ 'T', 'T', 'T' ], result: 'T' }
-//]
+//  (!P ∧ !Q)
+const e2 = (P, Q) => {
+  return conjuction(negation(P), negation(Q));
+};
+
+// (!P V !Q)
+const e3 = (P, Q) => {
+  return disjunction(negation(P), negation(Q));
+};
+
+// (P ∧ Q) V (!P ∧ !Q) equals to P ↔ Q
+const e4 = (P, Q) => {
+  return disjunction(conjuction(P, Q), e2(P, Q));
+};
+
+// P V (P ∧ Q)
+const e5 = (P, Q) => {
+  return disjunction(P, conjuction(P, Q));
+};
+
+// an alternative way to write  P → Q is !P V Q
+
+// console.log(isEqual(findLogic(e4, 2), findLogic(bicondition, 2)));
+console.log(findLogic(e5, 2));
